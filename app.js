@@ -1,9 +1,9 @@
 
 var data;
 var data2;
-function loadData(origen_o_destino = 'origen') {
+function loadData(origen_o_destino = 'origen',mes='2023-06',time='evening',mode='driving',week='weekend') {
     return new Promise((resolve, reject) => {
-        Papa.parse('Rproj/Output/filtros/2023-06_evening_driving_weekend.csv', {
+        Papa.parse('Rproj/Output/filtros/'+mes+'_'+time+'_'+mode+'_'+week+'.csv', {
             header: true,
             download: true,
             dynamicTyping: true,
@@ -57,11 +57,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map1);
 
-loadData(origen_o_destino='origen').then(parsedData => {
-    data = parsedData;
-    const heatPoints_l = L.heatLayer(data.slice(0, -1), { radius: 10, blur: 15, maxZoom: 1 });
-    heatPoints_l.addTo(map1);
-});
+// loadData(origen_o_destino='origen').then(parsedData => {
+//     data = parsedData;
+//     const heatPoints_l = L.heatLayer(data.slice(0, -1), { radius: 10, blur: 15, maxZoom: 1 });
+//     heatPoints_l.addTo(map1);
+// });
 
 // const heatPoints_l = L.heatLayer(heatPoints, { radius: 10, blur: 15, maxZoom: 1 });
 // heatPoints_l.addTo(map1);
@@ -70,16 +70,51 @@ const map2 = L.map('map2').setView(center, zoom);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map2);
-loadData(origen_o_destino='destino').then(parsedData => {
-    data2 = parsedData;
-    var heatPoints_ll = L.heatLayer(data2.slice(0, -1), { radius: 10, blur: 15, maxZoom: 1 });
-    heatPoints_ll.addTo(map2);
-});
+// loadData(origen_o_destino='destino').then(parsedData => {
+//     data2 = parsedData;
+//     var heatPoints_ll = L.heatLayer(data2.slice(0, -1), { radius: 10, blur: 15, maxZoom: 1 });
+//     heatPoints_ll.addTo(map2);
+// });
+function handleSelectChange() {
+    const mes = document.getElementById('mes').value;
+    const time = document.getElementById('time').value;
+    const mode = document.getElementById('mode').value;
+    const week = document.getElementById('week').value;
 
+    // Update map1 (origen)
+    loadData('origen', mes, time, mode, week).then(parsedData => {
+        data = parsedData;
+        map1.eachLayer(function(layer) {
+            if (layer instanceof L.HeatLayer) {
+                map1.removeLayer(layer);
+            }
+        });
+        const heatPoints_l = L.heatLayer(data.slice(0, -1), { radius: 10, blur: 15, maxZoom: 1 });
+        heatPoints_l.addTo(map1);
+        map1.fire('move');
+    });
+
+    // Update map2 (destino)
+    loadData('destino', mes, time, mode, week).then(parsedData => {
+        data2 = parsedData;
+        map2.eachLayer(function(layer) {
+            if (layer instanceof L.HeatLayer) {
+                map2.removeLayer(layer);
+            }
+        });
+        const heatPoints_ll = L.heatLayer(data2.slice(0, -1), { radius: 10, blur: 15, maxZoom: 1 });
+        heatPoints_ll.addTo(map2);
+    });
+}
+
+// Attach event listeners to all selects
+['mes', 'time', 'mode', 'week'].forEach(id => {
+    document.getElementById(id).addEventListener('change', handleSelectChange);
+});
 // var heatPoints_l2 = L.heatLayer(heatPoints_copy, { radius: 10, blur: 15, maxZoom: 1 });
 // heatPoints_l2.addTo(map2);
 // Optional: Basic sync (one-way)
-map1.on('move', function() {
+map1.on('moveend', function() {
 //bounds que lo cubren
 //Checamos los origenes cuyos destinos están dentro de los límites del mapa
 //Recalcular pesos
