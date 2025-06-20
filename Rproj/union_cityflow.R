@@ -16,8 +16,8 @@ files="Input/" |> list.files(all.files = T,full.names = T,pattern = ".gz$") |>
                                             "trip_scaled_ratio"
                                             ))})
 files_joint=do.call(rbind, files)
-files_joint |> dplyr::sample_n(size = 100) |> write.csv("Output/union_de_muestra.csv",row.names = F)
-files_joint |> write.csv("Output/union.csv",row.names = F)
+#files_joint |> dplyr::sample_n(size = 10000) |> write.csv("Output/union_de_muestra.csv",row.names = F)
+#files_joint |> write.csv("Output/union.csv",row.names = F)
 ## 22 millones de viajes.
 ##Posibles filtros:
 #trend_time %in% 
@@ -39,11 +39,12 @@ files_joint |> write.csv("Output/union.csv",row.names = F)
   # en auto, bicicleta y caminando
   # en fin de semana o entre semana
   # durante el mes de __
+union_de_muestra=read.csv("Output/union_de_muestra.csv")
 lista_longitudes=list()
 for(mes in c("2023-12" ,"2023-10", "2023-06")){
   for(time in unique(union_de_muestra$trend_time) ){
     for(mode in unique(union_de_muestra$travel_mode)){
-      for(week in unique(union_de_muestra$trend_wknd_week)){
+      #for(week in unique(union_de_muestra$trend_wknd_week)){
         
         # lista_longitudes=append(lista_longitudes,files_joint |> dplyr::filter(
         #   substr(start_timestamp,1,7)==mes &
@@ -52,21 +53,21 @@ for(mes in c("2023-12" ,"2023-10", "2023-06")){
         #     trend_wknd_week==week 
         # ) |> nrow())
         # print(lista_longitudes[[length(lista_longitudes)]])
-        files_joint |> dplyr::filter(
+        filtro=files_joint |> dplyr::filter(
             substr(start_timestamp,1,7)==mes &
               trend_time==time &
-              travel_mode==mode &
-              trend_wknd_week==week
-          ) |> dplyr::sample_n(size = 1000,weight = trip_scaled_ratio) |> 
+              travel_mode==mode 
+          ) 
+        filtro|> dplyr::sample_n(size = min(20000,nrow(filtro)),weight = trip_scaled_ratio) |> 
           dplyr::select(device_id:overlap_destination_long,start_timestamp,trip_duration_sec,trip_scaled_ratio)|> 
-          write.csv(paste0("Output/filtros/",mes,"_",time,"_",mode,"_",week,".csv"),row.names = F)
-      }
+          write.csv(paste0("Output/filtros/",mes,"_",time,"_",mode,".csv"),row.names = F)
+      #}
     }
   }
 }
-files_joint |> dplyr::filter(
-  substr(start_timestamp,1,7)=='2023-12' &
-    trend_time=='morning' &
-    travel_mode=='driving' &
-    trend_wknd_week=='weekend' 
-)
+# files_joint |> dplyr::filter(
+#   substr(start_timestamp,1,7)=='2023-12' &
+#     trend_time=='morning' &
+#     travel_mode=='driving' &
+#     trend_wknd_week=='weekend' 
+# )

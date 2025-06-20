@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@5.4.0/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-TjEsBrREQ8e4UQZBv0t+xyJqXlIR9Z0I2S84WzGcxjOpwG3287e0uXc5MqDVOLPh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    
     <style>
         body { margin: 0; padding: 0; }
         #container {
@@ -17,47 +22,92 @@
             height: 100vh;
             margin: 2vw;
         }
+        .daterangepicker .drp-calendar.right{
+            display: none;
+        }
+        .daterangepicker .calendar-table .prev span{
+            position: relative;
+            margin-bottom: 1000px;
+            z-index: -10 !important;
+            display: none;
+        }   
     </style>
 </head>
 <body>
     <div id="container">
         <div style="display: flex; flex-direction: column; justify-content: flex-start; margin: 2vw;">
+            <div class="row">
+            <div class="col-sm-6">
+                <div data-coreui-toggle="date-range-picker"></div>
+            </div>
+            </div>
             <label for="mes">Mes:</label>
             <select id="mes">
-                <option value="2023-06">2023-06</option>
+                <option value="2023-06" selected>2023-06</option>
                 <option value="2023-10">2023-10</option>
                 <option value="2023-12">2023-12</option>
             </select>
+            <input type="text" name="daterange" id="daterange" value="06/06/2023 - 06/06/2023" />
+            <script>
+            $('#mes').on('change', function() {
+                var val = $(this).val();
+                // Set start and end to first and last day of selected month
+                var start = moment(val + '-01');
+                var end = start.clone().endOf('month');
+                $('#daterange').data('daterangepicker').setStartDate(start);
+                $('#daterange').data('daterangepicker').setEndDate(end);
+                $('#daterange').val(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
+                $('#selectedDates').text($('#daterange').val());
+                handleSelectChange();
+            });
+            </script>
             <label for="time">Time:</label>
             <select id="time">
-                <option value="morning">morning</option>
+                <option value="morning" selected>morning</option>
                 <option value="afternoon">afternoon</option>
                 <option value="evening">evening</option>
                 <option value="night">night</option>
             </select>
             <label for="mode">Mode:</label>
             <select id="mode">
-                <option value="driving">driving</option>
+                <option value="driving" selected>driving</option>
                 <option value="walking">walking</option>
                 <option value="cycling">cycling</option>
             </select>
-            <label for="week">Week:</label>
-            <select id="week">
-                <option value="weekday">weekday</option>
-                <option value="weekend">weekend</option>
-            </select>
+            
         </div>
         <div id="map1"></div>
         <div id="map2"></div>
     </div>
     <!-- Leaflet JS -->
+     </body>
+     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script>
+$(function() {
+    $('input[name="daterange"]').daterangepicker({
+        singleDatePicker: false,
+        single: true,
+        standalone: true
+    }, function(start, end, label) {
+        console.log("Applied");
+        setTimeout(function() {
+            handleSelectChange();
+        }, 1000);
+    });
+
+    // Execute when input "daterange" updates
+    $('#daterange').on('apply.daterangepicker change', function() {
+        handleSelectChange();
+    });
+});
+</script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>    
     <script src="leaflet-heat.js"></script>
-    <script src="heat-data copy.js"></script>
-    <script src="heat-data copy 2.js"></script>
-    <script src="heat-data.js"></script>
     <script src="app.js"></script>
+    
 
 </body>
 </html>

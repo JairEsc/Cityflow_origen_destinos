@@ -3,3 +3,4 @@ Rproj/.RData
 Rproj/Input/*
 Rproj/Output/union.csv
 Rproj/.*
+.Rproj.user

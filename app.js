@@ -1,16 +1,21 @@
 
 var data;
 var data2;
-function loadData(origen_o_destino = 'origen',mes='2023-06',time='evening',mode='driving',week='weekend') {
+let initial_bounds= [[20.118906, -98.741019], [20.118906, -98.741019]];
+
+function loadData(origen_o_destino = 'origen',mes='2023-06',time='evening',mode='driving',fecha_inicio=1,fecha_fin=30) {
     return new Promise((resolve, reject) => {
-        Papa.parse('Rproj/Output/filtros/'+mes+'_'+time+'_'+mode+'_'+week+'.csv', {
+        Papa.parse('Rproj/Output/filtros/'+mes+'_'+time+'_'+mode+'.csv', {
             header: true,
             download: true,
             dynamicTyping: true,
             complete: function(results) {
                 if(origen_o_destino === 'destino') {
                     try {
-                    const parsedData_or = (results.data).map(function(row) {
+                    const parsedData_or = (results.data).slice(0,-1).filter(function(row){
+                        const day = parseInt(row.start_timestamp.split('-')[2], 10);
+                        return day >= fecha_inicio && day <= fecha_fin;
+                    }).map(function(row) {
                         return [
                             parseFloat(row.overlap_origin_lat),
                             parseFloat(row.overlap_origin_long)
@@ -23,7 +28,10 @@ function loadData(origen_o_destino = 'origen',mes='2023-06',time='evening',mode=
                 }
                 else{
                 try {
-                    const parsedData = (results.data).map(function(row) {
+                    const parsedData = (results.data).slice(0,-1).filter(function(row){
+                        const day = parseInt(row.start_timestamp.split('-')[2], 10);
+                        return day >= fecha_inicio && day <= fecha_fin;
+                    }).map(function(row) {
                         return [
                             parseFloat(row.overlap_destination_lat),
                             parseFloat(row.overlap_destination_long)
@@ -42,10 +50,6 @@ function loadData(origen_o_destino = 'origen',mes='2023-06',time='evening',mode=
     });
 }
 
-// loadData().then(parsedData => {
-//     data = parsedData;
-//     // You can initialize your maps or heat layers here if needed
-// });
 
 
 const center = [20.118906, -98.741019];
@@ -79,10 +83,14 @@ function handleSelectChange() {
     const mes = document.getElementById('mes').value;
     const time = document.getElementById('time').value;
     const mode = document.getElementById('mode').value;
-    const week = document.getElementById('week').value;
-
-    // Update map1 (origen)
-    loadData('origen', mes, time, mode, week).then(parsedData => {
+    //const week = document.getElementById('week').value;
+    const fechas =document.getElementById('daterange').value; // For the date range input
+    // fechas = "06/01/2023 - 06/30/2023"
+    const match = fechas.match(/(\d{2})\/(\d{2})\/\d{4} - \d{2}\/(\d{2})\/\d{4}/);
+    const fecha_inicio = match ? parseInt(match[2], 10) : 1;
+    const fecha_fin = match ? parseInt(match[3], 10) : 30;
+    console.log('Selected values:', mes, time, mode, fecha_inicio, fecha_fin);
+    loadData('origen', mes, time, mode,fecha_inicio,fecha_fin).then(parsedData => {
         data = parsedData;
         map1.eachLayer(function(layer) {
             if (layer instanceof L.HeatLayer) {
@@ -94,8 +102,7 @@ function handleSelectChange() {
         map1.fire('move');
     });
 
-    // Update map2 (destino)
-    loadData('destino', mes, time, mode, week).then(parsedData => {
+    loadData('destino', mes, time, mode,fecha_inicio,fecha_fin).then(parsedData => {
         data2 = parsedData;
         map2.eachLayer(function(layer) {
             if (layer instanceof L.HeatLayer) {
@@ -107,13 +114,15 @@ function handleSelectChange() {
     });
 }
 
-// Attach event listeners to all selects
-['mes', 'time', 'mode', 'week'].forEach(id => {
-    document.getElementById(id).addEventListener('change', handleSelectChange);
+['mes', 'time', 'mode','daterange'].forEach(id => {
+    document.getElementById(id).addEventListener('change', function(e) {
+        console.log(`Changed ${id}:`, e.target.value);
+        handleSelectChange();
+    });
 });
-// var heatPoints_l2 = L.heatLayer(heatPoints_copy, { radius: 10, blur: 15, maxZoom: 1 });
-// heatPoints_l2.addTo(map2);
-// Optional: Basic sync (one-way)
+handleSelectChange();
+
+
 map1.on('moveend', function() {
 //bounds que lo cubren
 //Checamos los origenes cuyos destinos están dentro de los límites del mapa
@@ -121,11 +130,12 @@ map1.on('moveend', function() {
 //Actualizar
 
     const bounds = map1.getBounds();
+    //initial_bounds=bounds
     console.log('Bounds:', bounds);
     // Filter heatPoints_copy to keep only points inside map1 bounds
-    const filteredPoints = data2.slice(0, -1).filter(function(coord, index) {
+    const filteredPoints = data2.slice(0,-1).filter(function(coord, index) {
         // coord should be [lat, lng, ...]
-        return bounds.contains([data.slice(0, -1)[index][0], data.slice(0, -1)[index][1]]);
+        return bounds.contains([data.slice(0,-1)[index][0], data.slice(0,-1)[index][1]]);
     });
     console.log('Filtered Points:', filteredPoints);
     // Remove old layer and add new filtered layer to map2
