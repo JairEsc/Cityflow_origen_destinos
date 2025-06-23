@@ -58,7 +58,8 @@
                 $('#daterange').data('daterangepicker').setEndDate(end);
                 $('#daterange').val(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
                 $('#selectedDates').text($('#daterange').val());
-                handleSelectChange();
+                console.log("Selected month changed to: " + val);
+                //handleSelectChange();
             });
             </script>
             <label for="time">Time:</label>
@@ -74,7 +75,7 @@
                 <option value="walking">walking</option>
                 <option value="cycling">cycling</option>
             </select>
-            
+            <p id="texto" style="width: 10vw; word-break: break-word; white-space: pre-line;">texto</p>
         </div>
         <div id="map1"></div>
         <div id="map2"></div>
@@ -92,20 +93,19 @@ $(function() {
         standalone: true
     }, function(start, end, label) {
         console.log("Applied");
-        setTimeout(function() {
-            handleSelectChange();
-        }, 1000);
+        $('#daterange').on('apply.daterangepicker change', function() {
+        handleSelectChange();
+    });
     });
 
     // Execute when input "daterange" updates
-    $('#daterange').on('apply.daterangepicker change', function() {
-        handleSelectChange();
-    });
+    
 });
 </script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>    
     <script src="leaflet-heat.js"></script>
+    <script src="Rproj/Input/geojson_hgo.js"></script>
     <script src="app.js"></script>
     
 
