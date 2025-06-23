@@ -15,11 +15,11 @@
         body { margin: 0; padding: 0; }
         #container {
             display: flex;
-            height: 100vh;
+            height: 86vh;
         }
         #map1, #map2 {
             flex: 1;
-            height: 100vh;
+            height: 84vh;
             margin: 2vw;
         }
         .daterangepicker .drp-calendar.right{
@@ -34,24 +34,43 @@
     </style>
 </head>
 <body>
-    <div id="container">
-        <div style="display: flex; flex-direction: column; justify-content: flex-start; margin: 2vw;">
-            <div class="row">
-            <div class="col-sm-6">
-                <div data-coreui-toggle="date-range-picker"></div>
+    <div style="display: flex; flex-direction: column; justify-content: flex-start; margin-left: 2vw; margin-right: 2vw; min-width: 300px; height: 12vh;">
+        <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 0.5em; margin-bottom: 1em;">Selecciona algunos filtros de los viajes</h3>
+        <div style="display: flex; flex-direction: row; gap: 1em; align-items: flex-end;">
+            <div>
+                <label for="mes">Mes:</label>
+                <select id="mes">
+                    <option value="2023-06" selected>2023-06</option>
+                    <option value="2023-10">2023-10</option>
+                    <option value="2023-12">2023-12</option>
+                </select>
             </div>
+            <div>
+                <label for="daterange">Rango de fechas:</label>
+                <input type="text" name="daterange" id="daterange" value="06/06/2023 - 06/06/2023" />
             </div>
-            <label for="mes">Mes:</label>
-            <select id="mes">
-                <option value="2023-06" selected>2023-06</option>
-                <option value="2023-10">2023-10</option>
-                <option value="2023-12">2023-12</option>
-            </select>
-            <input type="text" name="daterange" id="daterange" value="06/06/2023 - 06/06/2023" />
-            <script>
+            <div>
+                <label for="time">Hora:</label>
+                <select id="time">
+                    <option value="morning" selected>Mañana</option>
+                    <option value="afternoon">Tarde</option>
+                    <option value="evening">Noche</option>
+                    <option value="night">Madrugada</option>
+                </select>
+            </div>
+            <div>
+                <label for="mode">Modo:</label>
+                <select id="mode">
+                    <option value="driving" selected>Auto</option>
+                    <option value="walking">Caminando</option>
+                    <option value="cycling">Bicicleta</option>
+                </select>
+            </div>
+        </div>
+        <p id="texto" style="width: 90vw; word-break: break-word; white-space: pre-line;">texto</p>
+        <script>
             $('#mes').on('change', function() {
                 var val = $(this).val();
-                // Set start and end to first and last day of selected month
                 var start = moment(val + '-01');
                 var end = start.clone().endOf('month');
                 $('#daterange').data('daterangepicker').setStartDate(start);
@@ -59,24 +78,11 @@
                 $('#daterange').val(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
                 $('#selectedDates').text($('#daterange').val());
                 console.log("Selected month changed to: " + val);
-                //handleSelectChange();
             });
-            </script>
-            <label for="time">Time:</label>
-            <select id="time">
-                <option value="morning" selected>morning</option>
-                <option value="afternoon">afternoon</option>
-                <option value="evening">evening</option>
-                <option value="night">night</option>
-            </select>
-            <label for="mode">Mode:</label>
-            <select id="mode">
-                <option value="driving" selected>driving</option>
-                <option value="walking">walking</option>
-                <option value="cycling">cycling</option>
-            </select>
-            <p id="texto" style="width: 10vw; word-break: break-word; white-space: pre-line;">texto</p>
-        </div>
+        </script>
+    </div>
+    <div id="container">
+        
         <div id="map1"></div>
         <div id="map2"></div>
     </div>
